@@ -2,18 +2,25 @@ package com.springboot.security.config;
 
 import com.springboot.security.authentic.CustomeAuthenticationManager;
 import com.springboot.security.authentic.CustomeAuthenticationProvider;
+import com.springboot.security.filter.JWTFilter;
 import com.springboot.security.handler.CustomeFailureHandler;
 import com.springboot.security.handler.CustomeSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.ArrayList;
 
 /**
  * @Author:zdd
  * @Date： 2022/11/30 15:22
+ * 开启security 的debug模式，尽在开发时使用
  */
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 public class SecurityConfig {
 
     @Bean
@@ -25,11 +32,11 @@ public class SecurityConfig {
                 //开启表单登录的方式  会将 UsernamePasswordAuthenticationFilter 加入到过滤链中
                 .formLogin()
                 //下面指定了登录页的位置、失败/成功的重定向页面位置、表单登录时接收的用户名和密码
-                .loginPage("/login")
-                .failureForwardUrl("/error")
-                .successForwardUrl("/success")
-                .passwordParameter("password")
-                .usernameParameter("username")
+//                .loginPage("/login")
+//                .failureForwardUrl("/error")
+//                .successForwardUrl("/success")
+//                .passwordParameter("password")
+//                .usernameParameter("username")
                 //对失败/成功的请求进行处理
                 .failureHandler(new CustomeFailureHandler())
                 .successHandler(new CustomeSuccessHandler())
@@ -51,6 +58,12 @@ public class SecurityConfig {
                 //指定在特定过滤器位置 添加新的过滤器   JWT 的设置就是在这里设置的
 //                .addFilterAfter()
 //                .addFilterAfter()
+                //指定用户
+//                .userDetailsService()
+                .addFilterAfter(new JWTFilter(), UsernamePasswordAuthenticationFilter.class)
+                .userDetailsService(new InMemoryUserDetailsManager(new User("user","password",new ArrayList<>())))
                 .build();
     }
+
+
 }
